@@ -1,0 +1,36 @@
+---
+- hosts: wpdocker
+  remote_user: alex
+  become: yes
+
+  tasks:
+
+    - name: "DOCKER | Network"
+      docker_network:
+        name: wpnet
+
+    - name: "MYSQL | Container"
+      docker_container:
+        name: db
+        image: "mysql:5.7"
+        env:
+          MYSQL_ROOT_PASSWORD: "123456"
+          MYSQL_DATABASE: wpdb
+          MYSQL_USER: wpuser
+          MYSQL_PASSWORD: wppass
+        networks:
+          - name: wpnet
+
+    - name: "WORDPRESS | Container"
+      docker_container:
+        name: wordpress
+        image: wordpress
+        env:
+          WORDPRESS_DB_HOST: db
+          WORDPRESS_DB_USER: wpuser
+          WORDPRESS_DB_PASSWORD: wppass
+          WORDPRESS_DB_NAME: wpdb
+        networks:
+          - name: wpnet
+        ports:
+          - "80:80"
